@@ -1,494 +1,1209 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050607">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="RAZOR OS">
-<link rel="manifest" href="manifest.webmanifest">
-<title>RAZOR OS // MOBILE CONTROL CORE</title>
+
+<title>RAZOR OS</title>
+
 <style>
 :root{
-  --bg:#050607;--bg2:#080a0c;--panel:#0b0e10;--panel2:#101316;--line:#242a2f;
-  --line2:#343b41;--text:#eef1f3;--muted:#737b82;--faint:#4d545b;
-  --red:#d1484e;--red2:#74282c;--good:#6fa382;--amber:#b99050;
-  --safeB:env(safe-area-inset-bottom);--safeT:env(safe-area-inset-top)
+  --bg:#050607;
+  --panel:#0b0d0f;
+  --panel2:#101316;
+  --line:#24292e;
+  --text:#e8e9e9;
+  --dim:#737a80;
+  --red:#d94a50;
+  --green:#63d18a;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#030405;color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button,input,textarea,select{font:inherit}
-button{color:inherit}
-.hidden{display:none!important}
-::selection{background:#59272b;color:#fff}
 
-/* noise/grid atmosphere */
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;z-index:0;
-background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
-background-size:27px 27px}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-/* boot */
-#boot{position:fixed;z-index:9999;inset:0;display:grid;place-items:center;padding:28px;background:#030405}
-.bootWrap{width:min(440px,100%)}
-.wordmark{font-size:27px;font-weight:900;letter-spacing:7px}.wordmark em{font-style:normal;color:var(--red)}
-.kicker{font:9px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);letter-spacing:2.3px;margin-top:7px}
-.bootTerm{margin-top:30px;border-left:2px solid var(--red);padding:4px 0 4px 14px;
-font:10px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:#798087;min-height:105px}
-.bootLine{opacity:0;animation:reveal .14s forwards}@keyframes reveal{to{opacity:1}}
-.loadbar{margin-top:19px;height:2px;background:#171a1d;overflow:hidden}.loadbar i{display:block;height:100%;width:0;background:var(--red);animation:load .75s forwards}
-@keyframes load{to{width:100%}}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow:hidden;
+}
 
-/* shell */
-#shell{height:100%;position:relative;z-index:1;display:flex;flex-direction:column}
-.topbar{height:calc(59px + var(--safeT));padding:var(--safeT) 15px 0;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
-border-bottom:1px solid #1e2327;background:rgba(5,6,7,.96);backdrop-filter:blur(16px)}
-.brand{font-weight:900;font-size:14px;letter-spacing:3px}.brand b{color:var(--red)}
-.topState{text-align:right;font:8px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);letter-spacing:1.1px}
-.liveDot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-right:5px;box-shadow:0 0 9px #d1484e99}
-main{flex:1;min-height:0;overflow-y:auto;padding:16px 14px calc(92px + var(--safeB));scroll-behavior:smooth}
-.screen{display:none;animation:screenIn .18s ease}.screen.active{display:block}
-@keyframes screenIn{from{opacity:.15;transform:translateY(4px)}}
-.screenHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
-.screenTitle{font-size:25px;font-weight:760;letter-spacing:-.4px}.screenCode{font:9px ui-monospace,monospace;color:var(--muted);letter-spacing:2px;margin-top:4px}
-.tag{border:1px solid var(--line);padding:5px 7px;font:8px ui-monospace,monospace;color:var(--muted);letter-spacing:1px}
+body{
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
 
-/* surfaces */
-.panel{position:relative;border:1px solid var(--line);background:linear-gradient(180deg,#0d1012,#090b0d);padding:14px;margin-bottom:10px;overflow:hidden}
-.panel:before{content:"";position:absolute;top:0;left:0;width:34px;height:1px;background:var(--red)}
-.label{font:8.5px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase}
-.value{font-size:23px;font-weight:760;margin-top:5px}.muted{font-size:10px;color:var(--muted);line-height:1.5}.tiny{font:8px ui-monospace,monospace;color:var(--faint)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.hr{height:1px;background:#1f2428;margin:12px 0}
-.statusPill{border:1px solid var(--line);padding:4px 7px;font:8px ui-monospace,monospace;color:var(--muted)}
-.statusPill.good{color:var(--good);border-color:#2a4937}.statusPill.red{color:#df7378;border-color:#542b2e}
+button,input{
+  font:inherit;
+}
 
-/* core */
-.corePanel{min-height:275px;background:radial-gradient(circle at 50% 44%,#121619 0,#0a0d0f 41%,#080a0c 100%);overflow:hidden}
-.corePanel:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 49.8%,#ffffff07 50%,transparent 50.2%)}
-.coreArea{height:170px;display:grid;place-items:center;position:relative}
-.orbit{position:absolute;width:138px;height:138px;border:1px solid #32373c;border-radius:50%;animation:spin 18s linear infinite}
-.orbit:before{content:"";position:absolute;inset:15px;border-radius:50%;border:1px dashed #49282b}
-.orbit:after{content:"";position:absolute;inset:34px;border-radius:50%;border:1px solid #2a2f33}
-@keyframes spin{to{transform:rotate(360deg)}}
-.brain{position:relative;width:52px;height:52px;border-radius:44% 56% 48% 52%;
-background:radial-gradient(circle at 38% 35%,#8d3539,#351416 50%,#130a0b 72%);box-shadow:0 0 34px #d1484e29;
-animation:breathe 2.1s ease-in-out infinite}
-.brain:before,.brain:after{content:"";position:absolute;border:1px solid #804247;border-radius:50%}
-.brain:before{width:19px;height:25px;left:7px;top:11px}.brain:after{width:19px;height:26px;right:7px;top:13px}
-@keyframes breathe{50%{transform:scale(1.08);box-shadow:0 0 42px #d1484e40}}
-.sat{position:absolute;width:5px;height:5px;background:var(--red);border-radius:50%;box-shadow:0 0 8px #d1484ebb}
-.s1{transform:translate(-74px,-43px)}.s2{transform:translate(68px,-51px)}.s3{transform:translate(-61px,61px)}.s4{transform:translate(77px,42px)}
-.coreReadout{text-align:center}.coreReadout strong{font:10px ui-monospace,monospace;letter-spacing:2px}.coreReadout div{font-size:9px;color:var(--muted);margin-top:5px}
-.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.quick button,.opBtn,.actionBtn{
-border:1px solid var(--line);background:#0c0f11;padding:11px 10px;text-align:left}
-.quick button:active,.opBtn:active,.actionBtn:active{border-color:var(--red);background:#130c0d}
-.quick b{display:block;font:10px ui-monospace,monospace}.quick span{display:block;font-size:8px;color:var(--muted);margin-top:5px}
+/* BOOT */
 
-/* grid */
-.gridMap{height:360px;position:relative;overflow:hidden;border:1px solid var(--line);
-background:radial-gradient(circle at 50% 50%,#12171b 0,#080b0d 55%,#050607 100%)}
-.gridMap:before{content:"";position:absolute;inset:0;opacity:.65;background-image:
-linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
-background-size:31px 31px}
-.gridMap:after{content:"SIMULATION GRID";position:absolute;right:8px;top:8px;font:7px ui-monospace,monospace;letter-spacing:1.5px;color:#4c555c}
-.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;border:1px solid #623136;
-display:grid;place-items:center;background:#0a0d0f;box-shadow:0 0 30px #d1484e18;font:8px/1.4 ui-monospace,monospace;text-align:center;color:#a95f63}
-.hub:before{content:"";position:absolute;inset:-12px;border:1px dashed #33383d;border-radius:50%}
-.node{position:absolute;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#a6adb2;border:2px solid #252b30;z-index:4;transition:.18s}
-.node:after{content:"";position:absolute;width:30px;height:1px;background:#ffffff18;left:8px;top:4px;transform-origin:left center}
-.node.selected{background:var(--red);box-shadow:0 0 14px #d1484ecf;transform:translate(-50%,-50%) scale(1.25)}
-.node.offline{background:#3b3f43;box-shadow:none}
-.nodeLabel{position:absolute;z-index:3;transform:translate(-50%,10px);font:7px ui-monospace,monospace;color:#687078;white-space:nowrap}
-.scanSweep{position:absolute;inset:-35%;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 315deg,#d1484e12 345deg,#d1484e35 358deg,transparent 360deg);animation:sweep 1.25s linear infinite;display:none}
-.scanning .scanSweep{display:block}@keyframes sweep{to{transform:rotate(360deg)}}
-.intelDrawer{margin-top:10px}
+#boot{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:#030404;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:32px;
+}
 
-/* list, ops */
-.listItem{padding:11px 0;border-bottom:1px solid #1d2226}.listItem:last-child{border-bottom:0}
-.listTitle{font-size:12px;font-weight:700}.listMeta{font:8px/1.55 ui-monospace,monospace;color:var(--muted);margin-top:4px}
-.opsGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.opBtn{min-height:95px}.opBtn b{display:block;font-size:11px}.opBtn span{display:block;font:8px ui-monospace,monospace;color:var(--muted);margin-top:7px;line-height:1.4}
-.opLed{display:inline-block;width:6px;height:6px;border-radius:50%;background:#52585d;margin-right:5px}.opLed.on{background:var(--red);box-shadow:0 0 8px #d1484e99}
-.banner{border-left:3px solid var(--red);background:#100b0c;padding:10px 11px;margin-bottom:10px;font:9px/1.5 ui-monospace,monospace;color:#c0797d}
+.boot-inner{
+  width:100%;
+  max-width:700px;
+}
 
-/* form */
-input,textarea,select{width:100%;border:1px solid var(--line);border-radius:0;background:#060809;color:var(--text);padding:11px;margin-top:7px;outline:none}
-input:focus,textarea:focus,select:focus{border-color:#554247}textarea{min-height:95px;resize:vertical}
-.actionBtn{width:100%;margin-top:8px;text-align:center;font-weight:700;font-size:10px}
-.actionBtn.red{border-color:#5b2c30;color:#df6d72;background:#110b0c}
+.boot-logo{
+  font-size:42px;
+  font-weight:900;
+  letter-spacing:10px;
+}
 
-/* command overlay */
-#cmdShade{position:fixed;z-index:1000;inset:0;background:#0009;backdrop-filter:blur(5px);display:none}
-#cmdShade.show{display:block}
-.commandDeck{position:absolute;left:0;right:0;bottom:0;padding:12px 12px calc(12px + var(--safeB));background:#060809;border-top:1px solid #343a3f;box-shadow:0 -20px 60px #000}
-.cmdTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
-.cmdHist{height:230px;overflow:auto;border:1px solid #1e2428;background:#030405;padding:10px;font:10px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
-.cmdLine.user{color:#e7eaec}.cmdLine.sys{color:#727a80}.cmdLine.red{color:#d8666b}.cmdLine.good{color:#73a486}
-.cmdInputRow{display:flex;align-items:center;border:1px solid #2a3035;margin-top:8px;background:#050607}
-.cmdPrompt{padding:0 0 0 11px;color:var(--red);font-family:monospace}.cmdInput{margin:0;border:0!important;background:transparent!important;font-family:ui-monospace,monospace;padding:12px!important}
-.cmdHints{display:flex;gap:6px;overflow-x:auto;padding-top:8px}.cmdHints button{white-space:nowrap;border:1px solid #252b2f;background:#0b0e10;padding:7px 9px;font:8px ui-monospace,monospace;color:#899097}
+.slash{
+  color:var(--red);
+}
 
-/* nav */
-.bottomNav{position:fixed;z-index:100;left:0;right:0;bottom:0;height:calc(72px + var(--safeB));padding-bottom:var(--safeB);
-display:flex;border-top:1px solid #20262a;background:rgba(5,6,7,.98);backdrop-filter:blur(15px)}
-.nav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#626a71;font:7.5px ui-monospace,monospace;letter-spacing:.5px}
-.nav i{font-style:normal;font-size:18px;margin-bottom:4px}.nav.active{color:var(--red)}
-.cmdFab{width:54px!important;flex:0 0 54px!important}.cmdFab i{border:1px solid #5a2d31;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;background:#100a0b;color:#e27579;margin:0}
+.boot-sub{
+  margin-top:12px;
+  color:var(--dim);
+  letter-spacing:5px;
+  font:11px monospace;
+}
 
-/* alert */
-.toast{position:fixed;z-index:1200;top:calc(70px + var(--safeT));left:12px;right:12px;border:1px solid #3d2a2d;border-left:3px solid var(--red);background:#0d1012;
-padding:11px 12px;box-shadow:0 12px 34px #000b;font:9px/1.5 ui-monospace,monospace;animation:toast .2s ease}
-@keyframes toast{from{opacity:0;transform:translateY(-8px)}}
+.boot-lines{
+  margin-top:55px;
+  border-left:3px solid var(--red);
+  padding-left:20px;
+  min-height:130px;
+  font:12px monospace;
+  line-height:2;
+  color:#969ca0;
+}
 
-/* mini glitch on command */
-.glitch{animation:glitch .22s linear 1}@keyframes glitch{0%{transform:translateX(0)}25%{transform:translateX(2px)}50%{transform:translateX(-2px)}75%{transform:translateX(1px)}100%{transform:translateX(0)}}
-@media(min-width:720px){main{width:680px;max-width:100%;margin:auto}.bottomNav{left:50%;transform:translateX(-50%);max-width:680px}.commandDeck{left:50%;right:auto;width:680px;max-width:100%;transform:translateX(-50%)}}
+.loader{
+  margin-top:35px;
+  height:3px;
+  background:#171a1c;
+}
+
+.loader div{
+  width:0;
+  height:100%;
+  background:var(--red);
+  animation:load 1.2s ease forwards;
+}
+
+@keyframes load{
+  to{width:100%}
+}
+
+/* APP */
+
+#app{
+  display:none;
+  height:100%;
+  flex-direction:column;
+}
+
+header{
+  height:75px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  flex-shrink:0;
+}
+
+.brand{
+  font-weight:900;
+  letter-spacing:4px;
+  font-size:19px;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--dim);
+  font:10px monospace;
+  letter-spacing:2px;
+}
+
+.dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 10px var(--green);
+}
+
+main{
+  flex:1;
+  overflow:auto;
+  padding:18px;
+  padding-bottom:105px;
+}
+
+.page{
+  display:none;
+  animation:fade .18s ease;
+}
+
+.page.active{
+  display:block;
+}
+
+@keyframes fade{
+  from{opacity:.4;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+
+.eyebrow{
+  color:var(--red);
+  font:10px monospace;
+  letter-spacing:3px;
+}
+
+h1{
+  margin:8px 0 25px;
+  font-size:30px;
+  letter-spacing:-1px;
+}
+
+.card{
+  background:linear-gradient(145deg,#0d1012,#090b0c);
+  border:1px solid var(--line);
+  padding:18px;
+  margin-bottom:12px;
+  position:relative;
+  overflow:hidden;
+}
+
+.card:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:2px;
+  height:100%;
+  background:var(--red);
+  opacity:.7;
+}
+
+.label{
+  color:var(--dim);
+  font:9px monospace;
+  letter-spacing:2px;
+}
+
+.big{
+  font:24px monospace;
+  margin-top:8px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.metric{
+  min-height:95px;
+}
+
+.metric-value{
+  font:20px monospace;
+  margin-top:15px;
+}
+
+.green{
+  color:var(--green);
+}
+
+.red{
+  color:var(--red);
+}
+
+/* CORE */
+
+.core{
+  height:220px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.core-ring{
+  position:absolute;
+  width:150px;
+  height:150px;
+  border:1px solid #30363a;
+  border-radius:50%;
+  animation:spin 15s linear infinite;
+}
+
+.core-ring:before,
+.core-ring:after{
+  content:"";
+  position:absolute;
+  width:8px;
+  height:8px;
+  background:var(--red);
+  border-radius:50%;
+}
+
+.core-ring:before{
+  top:-4px;
+  left:70px;
+}
+
+.core-ring:after{
+  bottom:-4px;
+  left:70px;
+}
+
+.core-ring.two{
+  width:105px;
+  height:105px;
+  border-style:dashed;
+  animation-direction:reverse;
+  animation-duration:10s;
+}
+
+.core-center{
+  width:52px;
+  height:52px;
+  border:1px solid var(--red);
+  transform:rotate(45deg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 35px rgba(217,74,80,.12);
+}
+
+.core-center span{
+  transform:rotate(-45deg);
+  font:10px monospace;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+/* TERMINAL */
+
+.terminal{
+  background:#030404;
+  border:1px solid var(--line);
+  height:390px;
+  display:flex;
+  flex-direction:column;
+}
+
+.term-output{
+  flex:1;
+  overflow:auto;
+  padding:15px;
+  font:12px monospace;
+  line-height:1.8;
+  color:#a6adb2;
+  white-space:pre-wrap;
+}
+
+.term-line{
+  margin-bottom:3px;
+}
+
+.term-input{
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  padding:12px;
+  gap:8px;
+}
+
+.prompt{
+  color:var(--red);
+  font-family:monospace;
+}
+
+.term-input input{
+  flex:1;
+  background:none;
+  border:none;
+  outline:none;
+  color:white;
+  font-family:monospace;
+  font-size:16px;
+}
+
+/* NETWORK */
+
+.network-core{
+  height:290px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.node-center{
+  width:90px;
+  height:90px;
+  border:1px solid var(--red);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font:10px monospace;
+  text-align:center;
+  box-shadow:0 0 40px rgba(217,74,80,.1);
+}
+
+.orbit{
+  position:absolute;
+  width:220px;
+  height:220px;
+  border:1px dashed #24282c;
+  border-radius:50%;
+}
+
+.small-node{
+  position:absolute;
+  width:10px;
+  height:10px;
+  background:#747b80;
+  border-radius:50%;
+}
+
+.n1{top:31px;left:137px}
+.n2{bottom:47px;right:66px}
+.n3{bottom:48px;left:62px}
+
+.action{
+  width:100%;
+  border:1px solid #373c40;
+  background:#111416;
+  color:#ddd;
+  padding:16px;
+  margin-top:10px;
+  letter-spacing:2px;
+  font:11px monospace;
+}
+
+.action:active{
+  background:#1a1d20;
+}
+
+.action.red-btn{
+  border-color:#673236;
+  color:#ef7075;
+}
+
+/* VAULT */
+
+.note{
+  width:100%;
+  min-height:180px;
+  resize:vertical;
+  background:#050607;
+  color:#ddd;
+  border:1px solid #292e32;
+  padding:14px;
+  outline:none;
+  font:14px monospace;
+  margin-top:14px;
+}
+
+/* ACTIVITY */
+
+.log{
+  border-left:1px solid #303438;
+  padding:5px 0 18px 15px;
+  font:11px monospace;
+}
+
+.log-time{
+  color:var(--red);
+  margin-bottom:5px;
+}
+
+.log-text{
+  color:#a1a7ab;
+}
+
+/* NAV */
+
+nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:83px;
+  padding-bottom:env(safe-area-inset-bottom);
+  background:rgba(5,6,7,.97);
+  border-top:1px solid var(--line);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  z-index:20;
+}
+
+.nav{
+  border:0;
+  background:none;
+  color:#666d72;
+  font-size:9px;
+  letter-spacing:1px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+
+.nav-icon{
+  width:18px;
+  height:18px;
+  border:1px solid currentColor;
+  transform:rotate(45deg);
+}
+
+.nav.active{
+  color:#eee;
+}
+
+.nav.active .nav-icon{
+  border-color:var(--red);
+  box-shadow:0 0 10px rgba(217,74,80,.2);
+}
+
+/* LOCK */
+
+#lock{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:#030404;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.lock-title{
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:8px;
+}
+
+.lock-sub{
+  margin:15px 0 35px;
+  color:var(--dim);
+  font:10px monospace;
+  letter-spacing:3px;
+}
+
+.unlock{
+  background:none;
+  color:#ddd;
+  border:1px solid #33383c;
+  padding:15px 30px;
+  font:11px monospace;
+  letter-spacing:3px;
+}
 </style>
 </head>
+
 <body>
 
 <div id="boot">
-  <div class="bootWrap">
-    <div class="wordmark">RAZOR<em>/</em>OS</div>
-    <div class="kicker">MOBILE CONTROL CORE // INDEPENDENT SYSTEM</div>
-    <div class="bootTerm" id="bootTerm"></div>
-    <div class="loadbar"><i></i></div>
-  </div>
-</div>
+  <div class="boot-inner">
+    <div class="boot-logo">
+      RAZOR<span class="slash">/</span>OS
+    </div>
 
-<div id="shell">
-  <header class="topbar">
-    <div class="brand">RAZOR<b>/</b>OS</div>
-    <div class="topState"><span class="liveDot"></span><span id="topState">CORE ONLINE</span><br><span id="topSub">LOCAL SYSTEM</span></div>
-  </header>
+    <div class="boot-sub">
+      MOBILE CONTROL CORE // INITIALIZING
+    </div>
 
-  <main>
-    <section class="screen active" id="core">
-      <div class="screenHead">
-        <div><div class="screenTitle">CONTROL CORE</div><div class="screenCode">00 // PRIMARY INTERFACE</div></div>
-        <span class="tag">LOCAL</span>
-      </div>
+    <div class="boot-lines" id="bootText"></div>
 
-      <div class="panel corePanel" id="corePanel">
-        <div class="label">Central process</div>
-        <div class="coreArea">
-          <div class="orbit"></div><div class="brain"></div>
-          <i class="sat s1"></i><i class="sat s2"></i><i class="sat s3"></i><i class="sat s4"></i>
-        </div>
-        <div class="coreReadout"><strong id="coreState">SYSTEM STABLE</strong><div id="coreDetail">awaiting operator command</div></div>
-        <div class="quick">
-          <button onclick="execute('scan')"><b>INITIATE GRID</b><span>Run local simulation discovery</span></button>
-          <button onclick="openCommand()"><b>COMMAND CORE</b><span>Issue system instructions</span></button>
-        </div>
-      </div>
-
-      <div class="grid3">
-        <div class="panel"><div class="label">Nodes</div><div class="value" id="statNodes">0</div></div>
-        <div class="panel"><div class="label">Records</div><div class="value" id="statRecords">0</div></div>
-        <div class="panel"><div class="label">Events</div><div class="value" id="statEvents">0</div></div>
-      </div>
-
-      <div class="panel">
-        <div class="row"><div class="label">Live event stream</div><button onclick="openScreen('events')" class="tag" style="background:transparent">VIEW ALL</button></div>
-        <div id="recentEvents" style="margin-top:8px"></div>
-      </div>
-    </section>
-
-    <section class="screen" id="grid">
-      <div class="screenHead">
-        <div><div class="screenTitle">GRID</div><div class="screenCode">01 // SYSTEM SIMULATION</div></div>
-        <span id="gridPill" class="statusPill">STANDBY</span>
-      </div>
-      <div class="banner">LOCAL SIMULATION // This grid does not control or scan real infrastructure or nearby devices.</div>
-      <div class="gridMap" id="gridMap"><div class="scanSweep"></div><div class="hub">RAZOR<br>CORE</div></div>
-      <div class="panel intelDrawer">
-        <div class="label">Node intelligence</div>
-        <div id="nodeIntel" class="muted" style="margin-top:9px">No node selected. Run <b>scan</b> or press INITIATE GRID.</div>
-      </div>
-    </section>
-
-    <section class="screen" id="intel">
-      <div class="screenHead">
-        <div><div class="screenTitle">INTELLIGENCE</div><div class="screenCode">02 // LOCAL PROFILE ENGINE</div></div>
-        <span class="tag">SIM DATA</span>
-      </div>
-      <div class="panel">
-        <div class="label">Load simulation profile</div>
-        <input id="profileInput" placeholder="profile label / codename">
-        <button class="actionBtn" onclick="loadProfile(document.getElementById('profileInput').value)">ACQUIRE PROFILE</button>
-      </div>
-      <div class="panel" id="profileCard">
-        <div class="label">Profile channel</div>
-        <div class="muted" style="margin-top:10px">No simulation profile loaded.</div>
-      </div>
-    </section>
-
-    <section class="screen" id="ops">
-      <div class="screenHead">
-        <div><div class="screenTitle">OPERATIONS</div><div class="screenCode">03 // SIMULATED SYSTEMS</div></div>
-        <span class="tag">SANDBOX</span>
-      </div>
-      <div class="banner">Every operation on this screen affects only RAZOR OS's simulation.</div>
-      <div class="opsGrid" id="opsGrid"></div>
-      <div class="panel" style="margin-top:9px">
-        <div class="label">Grid state</div>
-        <div class="value" id="opsState">NORMAL</div>
-        <div class="muted" id="opsDetail">All simulated services nominal.</div>
-      </div>
-    </section>
-
-    <section class="screen" id="data">
-      <div class="screenHead">
-        <div><div class="screenTitle">DATABASE</div><div class="screenCode">04 // LOCAL RECORD STORAGE</div></div>
-        <span class="tag">PERSISTENT</span>
-      </div>
-      <div class="panel">
-        <div class="label">Create record</div>
-        <input id="rName" placeholder="record name">
-        <input id="rType" placeholder="type / category">
-        <textarea id="rNotes" placeholder="notes"></textarea>
-        <button class="actionBtn" onclick="addRecord()">COMMIT RECORD</button>
-      </div>
-      <input id="recordSearch" placeholder="search database" oninput="renderRecords()" style="margin:0 0 10px">
-      <div class="panel"><div class="label">Record index</div><div id="records" style="margin-top:8px"></div></div>
-    </section>
-
-    <section class="screen" id="security">
-      <div class="screenHead">
-        <div><div class="screenTitle">SECURITY</div><div class="screenCode">05 // LOCAL DEFENSIVE TOOLS</div></div>
-        <span class="tag">LOCAL</span>
-      </div>
-      <div class="grid2">
-        <button class="opBtn" onclick="securityTool('password')"><b>PASSGEN</b><span>Generate a random password</span></button>
-        <button class="opBtn" onclick="securityTool('strength')"><b>ANALYZE</b><span>Check password structure</span></button>
-        <button class="opBtn" onclick="securityTool('hash')"><b>SHA-256</b><span>Hash text locally</span></button>
-        <button class="opBtn" onclick="securityTool('base64')"><b>BASE64</b><span>Encode local text</span></button>
-      </div>
-      <div class="panel" style="margin-top:9px">
-        <div class="label">Tool input</div><textarea id="secInput" placeholder="enter text"></textarea>
-        <div class="label" style="margin-top:11px">Output</div>
-        <div id="secOutput" class="muted" style="white-space:pre-wrap;word-break:break-word;margin-top:8px">Select a tool.</div>
-      </div>
-    </section>
-
-    <section class="screen" id="events">
-      <div class="screenHead">
-        <div><div class="screenTitle">EVENT STREAM</div><div class="screenCode">06 // SYSTEM HISTORY</div></div>
-        <span class="tag" id="eventTag">0 EVENTS</span>
-      </div>
-      <input id="eventSearch" placeholder="search event stream" oninput="renderEvents()" style="margin:0 0 10px">
-      <div class="panel"><div id="eventList"></div></div>
-      <button class="actionBtn red" onclick="clearEvents()">CLEAR EVENT STREAM</button>
-    </section>
-  </main>
-
-  <nav class="bottomNav">
-    <div class="nav active" data-screen="core" onclick="openScreen('core')"><i>◎</i>CORE</div>
-    <div class="nav" data-screen="grid" onclick="openScreen('grid')"><i>⌖</i>GRID</div>
-    <div class="nav cmdFab" onclick="openCommand()"><i>&gt;_</i></div>
-    <div class="nav" data-screen="intel" onclick="openScreen('intel')"><i>▣</i>INTEL</div>
-    <div class="nav" data-screen="ops" onclick="openScreen('ops')"><i>∆</i>OPS</div>
-  </nav>
-</div>
-
-<div id="cmdShade" onclick="shadeClose(event)">
-  <div class="commandDeck" onclick="event.stopPropagation()">
-    <div class="cmdTop"><div><div class="label">Command core</div><div class="tiny">type HELP for command index</div></div><button class="tag" onclick="closeCommand()">CLOSE</button></div>
-    <div class="cmdHist" id="cmdHist"></div>
-    <div class="cmdInputRow"><span class="cmdPrompt">&gt;</span><input id="cmdInput" class="cmdInput" autocomplete="off" placeholder="issue command"></div>
-    <div class="cmdHints">
-      <button onclick="execute('scan')">scan</button><button onclick="execute('status')">status</button>
-      <button onclick="execute('nodes')">nodes</button><button onclick="execute('blackout')">blackout</button>
-      <button onclick="execute('restore')">restore</button><button onclick="execute('help')">help</button>
+    <div class="loader">
+      <div></div>
     </div>
   </div>
 </div>
 
+<div id="app">
+
+<header>
+  <div class="brand">
+    RAZOR<span class="slash">/</span>OS
+  </div>
+
+  <div class="status">
+    <span class="dot"></span>
+    CORE ONLINE
+  </div>
+</header>
+
+<main>
+
+<section id="home" class="page active">
+
+  <div class="eyebrow">01 // SYSTEM</div>
+  <h1>Control Core</h1>
+
+  <div class="card core">
+    <div class="core-ring"></div>
+    <div class="core-ring two"></div>
+    <div class="core-center"><span>CORE</span></div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card metric">
+      <div class="label">SYSTEM</div>
+      <div class="metric-value green">ONLINE</div>
+    </div>
+
+    <div class="card metric">
+      <div class="label">SESSION</div>
+      <div id="uptime" class="metric-value">00:00</div>
+    </div>
+
+    <div class="card metric">
+      <div class="label">NETWORK</div>
+      <div id="netState" class="metric-value">ONLINE</div>
+    </div>
+
+    <div class="card metric">
+      <div class="label">LOCAL TIME</div>
+      <div id="clock" class="metric-value">--:--</div>
+    </div>
+
+  </div>
+
+  <button class="action" onclick="openPage('terminal')">
+    OPEN COMMAND INTERFACE
+  </button>
+
+</section>
+
+<section id="terminal" class="page">
+
+  <div class="eyebrow">02 // COMMAND</div>
+  <h1>Terminal</h1>
+
+  <div class="terminal">
+
+    <div id="termOutput" class="term-output"></div>
+
+    <div class="term-input">
+      <span class="prompt">&gt;</span>
+
+      <input
+        id="command"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="enter command"
+      >
+    </div>
+
+  </div>
+
+</section>
+
+<section id="network" class="page">
+
+  <div class="eyebrow">03 // NETWORK</div>
+  <h1>Network Core</h1>
+
+  <div class="card network-core">
+
+    <div class="orbit"></div>
+
+    <div class="small-node n1"></div>
+    <div class="small-node n2"></div>
+    <div class="small-node n3"></div>
+
+    <div class="node-center">
+      RAZOR<br>NODE
+    </div>
+
+  </div>
+
+  <div class="grid">
+
+    <div class="card metric">
+      <div class="label">CONNECTION</div>
+      <div id="connection" class="metric-value green">ONLINE</div>
+    </div>
+
+    <div class="card metric">
+      <div class="label">TYPE</div>
+      <div id="connectionType" class="metric-value">WEB</div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <div class="label">NETWORK DISCOVERY</div>
+
+    <p style="color:#858c91;font:12px monospace;line-height:1.7">
+      Browser network module active. Full LAN discovery requires
+      the future RAZOR backend.
+    </p>
+
+    <button class="action" onclick="networkCheck()">
+      RUN CONNECTION CHECK
+    </button>
+  </div>
+
+</section>
+
+<section id="vault" class="page">
+
+  <div class="eyebrow">04 // STORAGE</div>
+  <h1>Vault</h1>
+
+  <div class="card">
+
+    <div class="label">LOCAL VAULT</div>
+
+    <textarea
+      id="vaultText"
+      class="note"
+      placeholder="Store private project notes here..."
+    ></textarea>
+
+    <button class="action" onclick="saveVault()">
+      SAVE VAULT
+    </button>
+
+    <button class="action red-btn" onclick="clearVault()">
+      CLEAR VAULT
+    </button>
+
+  </div>
+
+</section>
+
+<section id="activity" class="page">
+
+  <div class="eyebrow">05 // LOGS</div>
+  <h1>Activity</h1>
+
+  <div id="logs"></div>
+
+  <button class="action red-btn" onclick="clearLogs()">
+    CLEAR ACTIVITY
+  </button>
+
+</section>
+
+</main>
+
+<nav>
+
+<button class="nav active" data-page="home">
+  <span class="nav-icon"></span>
+  CORE
+</button>
+
+<button class="nav" data-page="terminal">
+  <span class="nav-icon"></span>
+  CMD
+</button>
+
+<button class="nav" data-page="network">
+  <span class="nav-icon"></span>
+  NET
+</button>
+
+<button class="nav" data-page="vault">
+  <span class="nav-icon"></span>
+  VAULT
+</button>
+
+<button class="nav" data-page="activity">
+  <span class="nav-icon"></span>
+  LOGS
+</button>
+
+</nav>
+
+</div>
+
+<div id="lock">
+  <div>
+
+    <div class="lock-title">
+      RAZOR<span class="slash">/</span>OS
+    </div>
+
+    <div class="lock-sub">
+      SYSTEM LOCKED
+    </div>
+
+    <button class="unlock" onclick="unlockSystem()">
+      UNLOCK
+    </button>
+
+  </div>
+</div>
+
 <script>
-const STORE={events:"rz_ctos_events",records:"rz_ctos_records",grid:"rz_ctos_grid",ops:"rz_ctos_ops"};
-const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
-const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-let events=load(STORE.events,[]);
-let records=load(STORE.records,[]);
-let nodes=load(STORE.grid,[]);
-let ops=load(STORE.ops,{blackout:false,cameras:true,transit:true,power:true,access:true,comms:true});
-let selected=null;
-const nodeTypes=["CAMERA NODE","ACCESS TERMINAL","POWER RELAY","TRANSIT LINK","DATA HUB","COMMUNICATION NODE","SECURITY NODE"];
-const qs=s=>document.querySelector(s), qsa=s=>[...document.querySelectorAll(s)];
-function esc(v){let d=document.createElement("div");d.textContent=String(v??"");return d.innerHTML}
-function ts(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"})}
-function setCore(a,b=""){qs("#coreState").textContent=a;qs("#coreDetail").textContent=b;qs("#topState").textContent=a;qs("#topSub").textContent=b||"LOCAL SYSTEM"}
-function pulse(a,b=""){setCore(a,b);qs("#corePanel").classList.add("glitch");setTimeout(()=>qs("#corePanel").classList.remove("glitch"),230);setTimeout(()=>setCore("SYSTEM STABLE","awaiting operator command"),1450)}
-function toast(t){qs(".toast")?.remove();let d=document.createElement("div");d.className="toast";d.innerHTML="<b style='color:#d8686d'>RAZOR //</b> "+esc(t);document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
-function log(text,type="SYSTEM"){events.unshift({id:Date.now()+Math.random(),time:ts(),type,text});events=events.slice(0,300);save(STORE.events,events);renderEvents();renderRecent();updateStats()}
-function openScreen(id){qsa(".screen").forEach(x=>x.classList.remove("active"));qs("#"+id).classList.add("active");qsa(".nav[data-screen]").forEach(n=>n.classList.toggle("active",n.dataset.screen===id));if(id==="grid")renderGrid();if(id==="ops")renderOps();if(id==="data")renderRecords()}
-function updateStats(){qs("#statNodes").textContent=nodes.length;qs("#statRecords").textContent=records.length;qs("#statEvents").textContent=events.length;qs("#eventTag").textContent=events.length+" EVENTS"}
-function renderRecent(){qs("#recentEvents").innerHTML=events.slice(0,4).map(e=>`<div class="listItem"><div class="listTitle">${esc(e.text)}</div><div class="listMeta">${esc(e.time)} // ${esc(e.type)}</div></div>`).join("")||"<div class='muted'>No system events yet.</div>"}
+const pages = document.querySelectorAll(".page");
+const navButtons = document.querySelectorAll(".nav");
 
-/* boot: intentionally short, no network dependency */
-const bootLines=["CORE INIT ........ OK","DATABASE ......... MOUNTED","COMMAND LAYER .... ONLINE","UI CHANNEL ....... READY"];
-bootLines.forEach((x,i)=>setTimeout(()=>{let d=document.createElement("div");d.className="bootLine";d.textContent=x;qs("#bootTerm").appendChild(d)},i*120));
-setTimeout(()=>{qs("#boot").classList.add("hidden");log("RAZOR OS initialized","BOOT")},720);
+let started = Date.now();
 
-/* command deck */
-function openCommand(){qs("#cmdShade").classList.add("show");setTimeout(()=>qs("#cmdInput").focus(),80)}
-function closeCommand(){qs("#cmdShade").classList.remove("show")}
-function shadeClose(e){if(e.target.id==="cmdShade")closeCommand()}
-function cmd(text,cls="sys"){let d=document.createElement("div");d.className="cmdLine "+cls;d.textContent=text;qs("#cmdHist").appendChild(d);qs("#cmdHist").scrollTop=999999}
-cmd("RAZOR OS COMMAND CORE // READY","sys");cmd("Type HELP for command index.","sys");
-qs("#cmdInput").addEventListener("keydown",e=>{if(e.key==="Enter"){let v=e.target.value;e.target.value="";execute(v)}});
+let activity =
+  JSON.parse(localStorage.getItem("razor_logs") || "[]");
 
-function help(){
-return `COMMAND INDEX
-help
-status
-scan
-grid
-nodes
-focus NODE-01
-trace NODE-01
-profile [label]
-intel
-ops
-camera on|off
-power on|off
-transit on|off
-access on|off
-comms on|off
-blackout
-restore
-database
-events
-security
-addrecord [name]
-clear
-reboot
-
-All grid/operations commands affect the local simulation only.`;
+function saveLogs(){
+  localStorage.setItem(
+    "razor_logs",
+    JSON.stringify(activity.slice(0,100))
+  );
 }
 
-async function execute(raw){
- let line=String(raw||"").trim();if(!line)return;openCommand();cmd("> "+line,"user");log("COMMAND // "+line,"COMMAND");pulse("COMMAND PROCESSING",line.toUpperCase());
- let p=line.split(/\s+/), c=p.shift().toLowerCase(), arg=p.join(" ");
- if(c==="help") return cmd(help());
- if(c==="status") return cmd(`CORE ........ ONLINE
-GRID ........ ${nodes.length?"LINKED":"STANDBY"}
-NODES ....... ${nodes.length}
-DATABASE .... ${records.length} RECORDS
-EVENTS ...... ${events.length}
-OPS STATE ... ${ops.blackout?"BLACKOUT":"NORMAL"}`,"good");
- if(c==="scan"){cmd("GRID DISCOVERY // INITIALIZED");closeCommand();runScan();setTimeout(()=>{openCommand();cmd("GRID DISCOVERY // "+nodes.length+" SIMULATION NODES ACQUIRED","good")},1000);return}
- if(c==="grid"){closeCommand();openScreen("grid");return}
- if(c==="nodes") return cmd(nodes.length?nodes.map(n=>`${n.id} // ${n.type} // ${n.online?"ONLINE":"OFFLINE"}`).join("\n"):"NO NODES // RUN scan");
- if(c==="focus"||c==="trace"){
-   let n=findNode(arg);if(!n)return cmd("NODE NOT FOUND","red");
-   selected=n.id;closeCommand();openScreen("grid");renderGrid();pulse(c==="trace"?"TRACE LOCK":"NODE FOCUS",n.id);
-   if(c==="trace"){setTimeout(()=>{openCommand();cmd(`TRACE // ${n.id}
-TYPE ....... ${n.type}
-STATE ...... ${n.online?"ONLINE":"OFFLINE"}
-SIGNAL ..... ${n.signal}%
-CHANNEL .... SIM-${n.channel}`,"good")},300)}
-   return
- }
- if(c==="profile"){closeCommand();loadProfile(arg||"UNLABELED");return}
- if(c==="intel"){closeCommand();openScreen("intel");return}
- if(c==="ops"){closeCommand();openScreen("ops");return}
- if(["camera","power","transit","access","comms"].includes(c)){
-   if(!["on","off"].includes(arg.toLowerCase()))return cmd(`USAGE // ${c} on|off`,"red");
-   ops[c==="camera"?"cameras":c]=arg.toLowerCase()==="on";save(STORE.ops,ops);renderOps();log(`${c.toUpperCase()} simulation ${arg.toUpperCase()}`,"OPS");cmd(`${c.toUpperCase()} // ${arg.toUpperCase()}`,"good");return
- }
- if(c==="blackout"){ops.blackout=true;["cameras","transit","power","access","comms"].forEach(k=>ops[k]=false);nodes.forEach(n=>n.online=false);save(STORE.ops,ops);save(STORE.grid,nodes);renderOps();renderGrid();toast("SIMULATION BLACKOUT ACTIVE");log("Simulation blackout activated","OPS");return cmd("BLACKOUT // SIMULATION GRID OFFLINE","red")}
- if(c==="restore"){ops={blackout:false,cameras:true,transit:true,power:true,access:true,comms:true};nodes.forEach(n=>n.online=true);save(STORE.ops,ops);save(STORE.grid,nodes);renderOps();renderGrid();toast("SIMULATION GRID RESTORED");log("Simulation grid restored","OPS");return cmd("RESTORE // ALL SIMULATION SYSTEMS NOMINAL","good")}
- if(c==="database"){closeCommand();openScreen("data");return}
- if(c==="events"){closeCommand();openScreen("events");return}
- if(c==="security"){closeCommand();openScreen("security");return}
- if(c==="addrecord"){if(!arg)return cmd("USAGE // addrecord [name]","red");records.unshift({id:Date.now(),name:arg,type:"COMMAND RECORD",notes:"Created through Command Core.",created:new Date().toLocaleString()});save(STORE.records,records);renderRecords();updateStats();return cmd("DATABASE WRITE // "+arg.toUpperCase(),"good")}
- if(c==="clear"){qs("#cmdHist").innerHTML="";return}
- if(c==="reboot"){cmd("UI RESTART REQUESTED","red");setTimeout(()=>location.reload(),500);return}
- return cmd("UNKNOWN COMMAND // "+c,"red");
+function log(text){
+
+  const now = new Date();
+
+  activity.unshift({
+    time: now.toLocaleTimeString(),
+    text:text
+  });
+
+  saveLogs();
+  renderLogs();
 }
 
-/* grid */
-function findNode(id){return nodes.find(n=>n.id.toLowerCase()===String(id||"").toLowerCase())}
-function runScan(){
- closeCommand();openScreen("grid");qs("#gridMap").classList.add("scanning");qs("#gridPill").textContent="SCANNING";
- pulse("GRID DISCOVERY","simulation channel active");
- nodes=[];
- let count=7;
- for(let i=0;i<count;i++){
-   let a=(Math.PI*2/count)*i+(Math.random()*.25),r=31+Math.random()*6;
-   nodes.push({id:"NODE-"+String(i+1).padStart(2,"0"),type:nodeTypes[Math.floor(Math.random()*nodeTypes.length)],signal:60+Math.floor(Math.random()*40),channel:10+Math.floor(Math.random()*89),x:50+Math.cos(a)*r,y:50+Math.sin(a)*r,online:!ops.blackout});
- }
- save(STORE.grid,nodes);renderGrid();
- setTimeout(()=>{qs("#gridMap").classList.remove("scanning");qs("#gridPill").textContent=ops.blackout?"BLACKOUT":"ONLINE";log("Grid simulation acquired "+nodes.length+" nodes","GRID");updateStats()},900)
-}
-function renderGrid(){
- let map=qs("#gridMap");map.querySelectorAll(".node,.nodeLabel").forEach(x=>x.remove());
- nodes.forEach(n=>{
-   let d=document.createElement("button");d.className="node"+(selected===n.id?" selected":"")+(n.online?"":" offline");d.style.left=n.x+"%";d.style.top=n.y+"%";d.onclick=()=>{selected=n.id;renderGrid();renderNodeIntel(n);pulse("NODE SELECTED",n.id);log("Selected "+n.id,"GRID")};
-   let l=document.createElement("div");l.className="nodeLabel";l.style.left=n.x+"%";l.style.top=n.y+"%";l.textContent=n.id;map.append(d,l)
- });
- qs("#gridPill").textContent=nodes.length?(ops.blackout?"BLACKOUT":"ONLINE"):"STANDBY";
- let n=findNode(selected);if(n)renderNodeIntel(n);else qs("#nodeIntel").innerHTML="No node selected. Run <b>scan</b> or press INITIATE GRID."
-}
-function renderNodeIntel(n){qs("#nodeIntel").innerHTML=`<div class="row"><div><div class="listTitle">${esc(n.id)}</div><div class="listMeta">${esc(n.type)}</div></div><span class="statusPill ${n.online?"good":"red"}">${n.online?"ONLINE":"OFFLINE"}</span></div><div class="hr"></div><div class="grid2"><div><div class="label">Signal</div><div class="value">${n.signal}%</div></div><div><div class="label">Channel</div><div class="value">SIM-${n.channel}</div></div></div><div class="muted" style="margin-top:9px">Simulation node. No real device or infrastructure access is being performed.</div>`}
+function renderLogs(){
 
-/* profile */
-function seeded(s){let h=2166136261;for(let ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return Math.abs(h)}
-function loadProfile(label){
- label=String(label||"").trim()||"UNLABELED";qs("#profileInput").value=label;openScreen("intel");let h=seeded(label),ids=100000+(h%899999),risk=["LOW","MODERATE","RESTRICTED"][h%3],classv=["CIVILIAN","OPERATOR","SYSTEM USER","FIELD CONTACT"][h%4];
- qs("#profileCard").innerHTML=`<div class="label">Simulation profile</div><div style="font-size:22px;font-weight:760;margin-top:10px">${esc(label.toUpperCase())}</div><div class="listMeta">LOCAL SYNTHETIC RECORD // NOT A REAL PERSON LOOKUP</div><div class="hr"></div>
- <div class="listItem row"><span class="label">Profile ID</span><span class="listMeta">RZ-${ids}</span></div>
- <div class="listItem row"><span class="label">Class</span><span class="listMeta">${classv}</span></div>
- <div class="listItem row"><span class="label">Access</span><span class="listMeta">${risk}</span></div>
- <div class="listItem row"><span class="label">Source</span><span class="listMeta">RAZOR LOCAL SIM</span></div>`;
- log("Simulation profile loaded: "+label,"INTEL");pulse("PROFILE ACQUIRED",label.toUpperCase())
+  const container = document.getElementById("logs");
+
+  if(!activity.length){
+
+    container.innerHTML =
+      '<div class="card"><div class="label">NO ACTIVITY RECORDED</div></div>';
+
+    return;
+  }
+
+  container.innerHTML =
+    activity.map(item => `
+      <div class="log">
+        <div class="log-time">${item.time}</div>
+        <div class="log-text">${escapeHTML(item.text)}</div>
+      </div>
+    `).join("");
 }
 
-/* operations */
-function renderOps(){
- let items=[["cameras","CAMERA GRID","visual monitoring simulation"],["power","POWER RELAY","power-state simulation"],["transit","TRANSIT CONTROL","routing-state simulation"],["access","ACCESS GRID","door/access simulation"],["comms","COMMUNICATIONS","communications simulation"]];
- qs("#opsGrid").innerHTML=items.map(([k,n,d])=>`<button class="opBtn" onclick="toggleOp('${k}')"><b><i class="opLed ${ops[k]?"on":""}"></i>${n}</b><span>${d}<br>${ops[k]?"ONLINE":"OFFLINE"}</span></button>`).join("");
- qs("#opsState").textContent=ops.blackout?"BLACKOUT":"NORMAL";qs("#opsDetail").textContent=ops.blackout?"All simulation services disabled.":"Simulation services available.";
-}
-function toggleOp(k){ops[k]=!ops[k];if(ops[k])ops.blackout=false;save(STORE.ops,ops);renderOps();log(k.toUpperCase()+" simulation "+(ops[k]?"ONLINE":"OFFLINE"),"OPS");pulse("OPS STATE CHANGE",k.toUpperCase())}
+function escapeHTML(value){
 
-/* database */
-function addRecord(){
- let name=qs("#rName").value.trim();if(!name)return toast("RECORD NAME REQUIRED");
- records.unshift({id:Date.now(),name,type:qs("#rType").value.trim()||"GENERAL",notes:qs("#rNotes").value.trim(),created:new Date().toLocaleString()});
- save(STORE.records,records);["#rName","#rType","#rNotes"].forEach(s=>qs(s).value="");renderRecords();updateStats();log("Database record committed: "+name,"DATABASE");pulse("DATABASE WRITE",name.toUpperCase())
-}
-function deleteRecord(id){records=records.filter(r=>r.id!==id);save(STORE.records,records);renderRecords();updateStats();log("Database record deleted","DATABASE")}
-function renderRecords(){
- let q=(qs("#recordSearch")?.value||"").toLowerCase(),arr=records.filter(r=>(r.name+" "+r.type+" "+r.notes).toLowerCase().includes(q));
- qs("#records").innerHTML=arr.map(r=>`<div class="listItem"><div class="row"><div><div class="listTitle">${esc(r.name)}</div><div class="listMeta">${esc(r.type)} // ${esc(r.created)}</div></div><button class="tag" onclick="deleteRecord(${r.id})">DELETE</button></div>${r.notes?`<div class="muted" style="margin-top:7px">${esc(r.notes)}</div>`:""}</div>`).join("")||"<div class='muted'>No matching records.</div>"
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
 }
 
-/* security */
-function randomPassword(n=20){let chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*-_",a=new Uint32Array(n);crypto.getRandomValues(a);return [...a].map(x=>chars[x%chars.length]).join("")}
-async function sha256(t){let d=new TextEncoder().encode(t),h=await crypto.subtle.digest("SHA-256",d);return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}
-async function securityTool(t){
- let i=qs("#secInput").value,o=qs("#secOutput");pulse("SECURITY MODULE",t.toUpperCase());
- if(t==="password")o.textContent=randomPassword();
- if(t==="strength"){let s=0,a=[];if(i.length>=12)s++;else a.push("Use 12+ characters.");if(/[a-z]/.test(i)&&/[A-Z]/.test(i))s++;else a.push("Mix uppercase/lowercase.");if(/\d/.test(i))s++;else a.push("Add numbers.");if(/[^A-Za-z0-9]/.test(i))s++;else a.push("Add symbols.");o.textContent=`STRUCTURE SCORE ${s}/4\n${["WEAK","LIMITED","FAIR","STRONG","VERY STRONG"][s]}\n${a.join("\n")}`}
- if(t==="hash")o.textContent=await sha256(i);
- if(t==="base64"){try{o.textContent=btoa(unescape(encodeURIComponent(i)))}catch{o.textContent="Unable to encode input."}}
- log("Security tool used: "+t.toUpperCase(),"SECURITY")
+function openPage(name){
+
+  pages.forEach(page =>
+    page.classList.toggle(
+      "active",
+      page.id === name
+    )
+  );
+
+  navButtons.forEach(button =>
+    button.classList.toggle(
+      "active",
+      button.dataset.page === name
+    )
+  );
 }
 
-/* events */
-function renderEvents(){
- let q=(qs("#eventSearch")?.value||"").toLowerCase(),a=events.filter(e=>(e.text+" "+e.type+" "+e.time).toLowerCase().includes(q));
- qs("#eventList").innerHTML=a.map(e=>`<div class="listItem"><div class="listTitle">${esc(e.text)}</div><div class="listMeta">${esc(e.time)} // ${esc(e.type)}</div></div>`).join("")||"<div class='muted'>No matching events.</div>";updateStats()
-}
-function clearEvents(){events=[];save(STORE.events,events);renderEvents();renderRecent();updateStats();toast("EVENT STREAM CLEARED")}
+navButtons.forEach(button => {
 
-/* init */
-renderOps();renderGrid();renderRecords();renderEvents();renderRecent();updateStats();
-if("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  button.onclick = () => {
+
+    openPage(button.dataset.page);
+
+    log(
+      "Opened " +
+      button.dataset.page.toUpperCase() +
+      " module"
+    );
+  };
+
+});
+
+function boot(){
+
+  const lines = [
+    "BOOT SEQUENCE ACCEPTED",
+    "LOADING CORE INTERFACE",
+    "RESTORING LOCAL STATE",
+    "INITIALIZING COMMAND ENGINE",
+    "CHECKING NETWORK STATE",
+    "CONTROL CORE READY"
+  ];
+
+  const box = document.getElementById("bootText");
+
+  let i = 0;
+
+  function next(){
+
+    if(i < lines.length){
+
+      box.innerHTML +=
+        "<div>&gt; " +
+        lines[i] +
+        "</div>";
+
+      i++;
+
+      setTimeout(next,110);
+
+    } else {
+
+      setTimeout(() => {
+
+        document.getElementById("boot").style.display="none";
+        document.getElementById("app").style.display="flex";
+
+        log("RAZOR OS initialized");
+
+      },250);
+    }
+  }
+
+  next();
+}
+
+function updateClock(){
+
+  const now = new Date();
+
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString([],{
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+
+  let sec =
+    Math.floor((Date.now()-started)/1000);
+
+  let min =
+    Math.floor(sec/60);
+
+  sec %= 60;
+
+  document.getElementById("uptime").textContent =
+    String(min).padStart(2,"0") +
+    ":" +
+    String(sec).padStart(2,"0");
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+function updateNetwork(){
+
+  const online = navigator.onLine;
+
+  document.getElementById("netState").textContent =
+    online ? "ONLINE" : "OFFLINE";
+
+  document.getElementById("connection").textContent =
+    online ? "ONLINE" : "OFFLINE";
+
+  document.getElementById("connection").className =
+    "metric-value " +
+    (online ? "green" : "red");
+
+  const c =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
+
+  document.getElementById("connectionType").textContent =
+    c && c.effectiveType
+      ? c.effectiveType.toUpperCase()
+      : "WEB";
+}
+
+window.addEventListener("online",()=>{
+  updateNetwork();
+  log("Network connection restored");
+});
+
+window.addEventListener("offline",()=>{
+  updateNetwork();
+  log("Network connection lost");
+});
+
+updateNetwork();
+
+const output =
+  document.getElementById("termOutput");
+
+function terminalPrint(text){
+
+  const line =
+    document.createElement("div");
+
+  line.className="term-line";
+  line.textContent=text;
+
+  output.appendChild(line);
+
+  output.scrollTop =
+    output.scrollHeight;
+}
+
+terminalPrint("RAZOR OS COMMAND INTERFACE");
+terminalPrint("Type HELP for available commands.");
+terminalPrint("");
+
+const input =
+  document.getElementById("command");
+
+input.addEventListener("keydown",e=>{
+
+  if(e.key === "Enter"){
+
+    const cmd =
+      input.value.trim();
+
+    input.value="";
+
+    runCommand(cmd);
+  }
+});
+
+function runCommand(raw){
+
+  if(!raw) return;
+
+  terminalPrint("> "+raw);
+
+  const cmd =
+    raw.toLowerCase().trim();
+
+  log("Command executed: "+raw);
+
+  if(cmd === "help"){
+
+    terminalPrint(
+`AVAILABLE COMMANDS
+
+HELP
+STATUS
+TIME
+NETWORK
+OPEN CORE
+OPEN NETWORK
+OPEN VAULT
+OPEN LOGS
+CLEAR
+LOCK
+ABOUT`
+    );
+
+  }
+
+  else if(cmd === "status"){
+
+    terminalPrint(
+`SYSTEM: ONLINE
+CORE: ACTIVE
+NETWORK: ${navigator.onLine ? "ONLINE":"OFFLINE"}
+STORAGE: READY
+INTERFACE: MOBILE WEB`
+    );
+
+  }
+
+  else if(cmd === "time"){
+
+    terminalPrint(
+      new Date().toLocaleString()
+    );
+
+  }
+
+  else if(cmd === "network"){
+
+    terminalPrint(
+      navigator.onLine
+      ? "Network connection detected."
+      : "No network connection detected."
+    );
+
+  }
+
+  else if(cmd === "open core"){
+
+    terminalPrint("Opening control core...");
+    openPage("home");
+
+  }
+
+  else if(cmd === "open network"){
+
+    terminalPrint("Opening network module...");
+    openPage("network");
+
+  }
+
+  else if(cmd === "open vault"){
+
+    terminalPrint("Opening vault...");
+    openPage("vault");
+
+  }
+
+  else if(cmd === "open logs"){
+
+    terminalPrint("Opening activity logs...");
+    openPage("activity");
+
+  }
+
+  else if(cmd === "clear"){
+
+    output.innerHTML="";
+
+  }
+
+  else if(cmd === "lock"){
+
+    terminalPrint("Locking interface...");
+
+    setTimeout(lockSystem,300);
+
+  }
+
+  else if(cmd === "about"){
+
+    terminalPrint(
+`RAZOR/OS
+Mobile Control Core
+
+Independent browser-based
+control interface.
+
+Build: 2.0`
+    );
+
+  }
+
+  else{
+
+    terminalPrint(
+      "UNKNOWN COMMAND // TYPE HELP"
+    );
+  }
+}
+
+function networkCheck(){
+
+  updateNetwork();
+
+  if(navigator.onLine){
+
+    log("Connection check completed: ONLINE");
+
+    alert(
+      "RAZOR NETWORK\n\nInternet connection detected.\n\nFull device discovery will require the RAZOR backend."
+    );
+
+  }else{
+
+    log("Connection check completed: OFFLINE");
+
+    alert(
+      "RAZOR NETWORK\n\nNo active connection detected."
+    );
+  }
+}
+
+const vault =
+  document.getElementById("vaultText");
+
+vault.value =
+  localStorage.getItem("razor_vault") || "";
+
+function saveVault(){
+
+  localStorage.setItem(
+    "razor_vault",
+    vault.value
+  );
+
+  log("Vault updated");
+
+  alert("VAULT SAVED");
+}
+
+function clearVault(){
+
+  if(confirm("Clear the local vault?")){
+
+    vault.value="";
+
+    localStorage.removeItem(
+      "razor_vault"
+    );
+
+    log("Vault cleared");
+  }
+}
+
+function clearLogs(){
+
+  if(confirm("Clear activity history?")){
+
+    activity=[];
+
+    saveLogs();
+    renderLogs();
+  }
+}
+
+function lockSystem(){
+
+  document.getElementById("lock").style.display="flex";
+}
+
+function unlockSystem(){
+
+  document.getElementById("lock").style.display="none";
+
+  log("System unlocked");
+}
+
+renderLogs();
+boot();
 </script>
+
 </body>
 </html>
